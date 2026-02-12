@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Use static export for SiteGround compatibility
-  output: 'export',
+  // Don't use static export - we need API routes for authentication and database
+  // output: 'export',
   
   // Image optimization settings
   images: {
@@ -14,7 +14,15 @@ const nextConfig = {
   // Environment variables for build
   env: {
     DEPLOYMENT_TARGET: 'siteground',
-    DOMAIN: 'cc.willer-hansen.dk'
+    DOMAIN: 'cc.willer-hansen.dk',
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'https://cc.willer-hansen.dk'
+  },
+  
+  // Experimental features
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['cc.willer-hansen.dk', 'localhost']
+    }
   }
 }
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { signIn, getSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Shield, Command } from 'lucide-react'
 
@@ -16,21 +17,27 @@ export default function LoginPage() {
     setIsLoading(true)
     setError('')
 
-    // Simple client-side authentication for demo
-    if (email === 'simon@simonwiller.dk' && password === 'admin123') {
-      // Store authentication in localStorage
-      localStorage.setItem('cc_auth', JSON.stringify({
+    try {
+      const result = await signIn('credentials', {
         email,
-        name: 'Simon Willer',
-        authenticated: true,
-        loginTime: new Date().toISOString()
-      }))
-      router.push('/dashboard')
-    } else {
-      setError('Invalid email or password')
+        password,
+        redirect: false,
+      })
+
+      if (result?.error) {
+        setError('Invalid email or password')
+      } else {
+        // Get session and redirect
+        const session = await getSession()
+        if (session) {
+          router.push('/dashboard')
+        }
+      }
+    } catch (error) {
+      setError('Authentication failed. Please try again.')
+    } finally {
+      setIsLoading(false)
     }
-    
-    setIsLoading(false)
   }
 
   return (
@@ -110,7 +117,7 @@ export default function LoginPage() {
           <div className="mt-8 pt-6 border-t border-white/10">
             <div className="text-center text-sm text-slate-400">
               <div className="mb-2">
-                <span className="font-medium">Demo Login:</span>
+                <span className="font-medium">Login:</span>
               </div>
               <div className="font-mono text-xs bg-black/20 rounded-lg p-2">
                 simon@simonwiller.dk / admin123

@@ -27,8 +27,8 @@ jobs:
     - name: 🚀 Deploy to SiteGround
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
-        server: ftp.willer-hansen.dk
-        username: willer-hansen.dk
-        password: WillerHansen2026!
+        server: ${{ secrets.SITEGROUND_HOST }}
+        username: ${{ secrets.SITEGROUND_USER }}
+        password: ${{ secrets.SITEGROUND_PASSWORD }}
         local-dir: ./out/
         server-dir: /public_html/

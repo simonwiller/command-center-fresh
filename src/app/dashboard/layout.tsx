@@ -1,8 +1,7 @@
 'use client'
 
-import { useSession, signOut } from 'next-auth/react'
 import { useRouter, usePathname } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { 
   LayoutDashboard, 
@@ -20,30 +19,57 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Agent Board', href: '/dashboard/agent-board', icon: Users },
   { name: 'Personal Board', href: '/dashboard/personal-board', icon: User },
-  { name: 'Tasks', href: '/dashboard/tasks', icon: CheckSquare },
   { name: 'Activity', href: '/dashboard/activity', icon: Activity },
 ]
+
+interface AuthData {
+  email: string
+  name: string
+  authenticated: boolean
+  loginTime: string
+}
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const { data: session, status } = useSession()
   const router = useRouter()
   const pathname = usePathname()
+  const [authData, setAuthData] = useState<AuthData | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/')
+    const checkAuth = () => {
+      try {
+        const stored = localStorage.getItem('cc_auth')
+        if (stored) {
+          const parsed = JSON.parse(stored) as AuthData
+          if (parsed.authenticated) {
+            setAuthData(parsed)
+          } else {
+            router.push('/')
+          }
+        } else {
+          router.push('/')
+        }
+      } catch (error) {
+        console.error('Auth check error:', error)
+        router.push('/')
+      } finally {
+        setLoading(false)
+      }
     }
-  }, [status, router])
 
-  const handleSignOut = async () => {
-    await signOut({ callbackUrl: '/' })
+    checkAuth()
+  }, [router])
+
+  const handleSignOut = () => {
+    localStorage.removeItem('cc_auth')
+    router.push('/')
   }
 
-  if (status === 'loading') {
+  if (loading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="text-center">
@@ -54,7 +80,7 @@ export default function DashboardLayout({
     )
   }
 
-  if (!session) {
+  if (!authData) {
     return null
   }
 
@@ -103,12 +129,12 @@ export default function DashboardLayout({
               <div className="flex items-center">
                 <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center mr-3">
                   <span className="text-white font-semibold text-sm">
-                    {session.user?.name?.charAt(0) || 'S'}
+                    {authData.name.charAt(0)}
                   </span>
                 </div>
                 <div>
-                  <p className="text-white font-medium">{session.user?.name || 'Simon'}</p>
-                  <p className="text-slate-400 text-sm">{session.user?.email}</p>
+                  <p className="text-white font-medium">{authData.name}</p>
+                  <p className="text-slate-400 text-sm">{authData.email}</p>
                 </div>
               </div>
             </div>

@@ -21,16 +21,7 @@ jobs:
     - name: 📚 Install dependencies
       run: npm install
     
-    - name: 🔧 Create environment file
-      run: |
-        echo "DATABASE_HOST=${{ secrets.DATABASE_HOST }}" > .env.local
-        echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" >> .env.local
-        echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env.local
-        echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> .env.local
-        echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> .env.local
-        echo "NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}" >> .env.local
-    
-    - name: 🏗️ Build Next.js application
+    - name: 🏗️ Build Next.js static export
       run: npm run build
     
     - name: 🚀 Deploy to SiteGround

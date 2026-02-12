@@ -1,0 +1,43 @@
+name: Deploy Command Center V2
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    
+    - name: 📚 Install dependencies
+      run: npm install
+    
+    - name: 🔧 Create environment file
+      run: |
+        echo "DATABASE_HOST=${{ secrets.DATABASE_HOST }}" > .env.local
+        echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" >> .env.local
+        echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env.local
+        echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> .env.local
+        echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> .env.local
+        echo "NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}" >> .env.local
+    
+    - name: 🏗️ Build Next.js application
+      run: npm run build
+    
+    - name: 🚀 Deploy to SiteGround
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ftp.willer-hansen.dk
+        username: willer-hansen.dk
+        password: WillerHansen2026!
+        local-dir: ./out/
+        server-dir: /public_html/
